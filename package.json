@@ -1,0 +1,10 @@
+{
+  "name": "celine-root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["backend", "frontend"],
+  "scripts": {
+    "start": "cd backend && npm start",
+    "heroku-postbuild": "cd frontend && npm install && npm run build && cp -a dist/. ../backend/public/"
+  }
+}
