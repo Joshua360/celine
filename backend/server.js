@@ -20,7 +20,6 @@ const app = express();
 // ----------------------
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
-
 app.use(
   cors({
     origin: "*",
@@ -51,15 +50,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 
 // ----------------------
-// Serve React Frontend
+// Serve React Frontend (Express v5 safe)
 // ----------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, "public")));
 
-// IMPORTANT: Express v5 requires "/*", not "*"
-app.get("/*", (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
