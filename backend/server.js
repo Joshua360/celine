@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "*", // (You can restrict later)
+    origin: "*",
     credentials: true,
   })
 );
@@ -51,15 +51,15 @@ app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 
 // ----------------------
-// Serve React Frontend Build (HEROKU REQUIREMENT)
+// Serve React Frontend
 // ----------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve the frontend build inside /backend/public
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("*", (req, res) => {
+// IMPORTANT: Express v5 requires "/*", not "*"
+app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
