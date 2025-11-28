@@ -7,35 +7,66 @@ import mongoose from "mongoose";
 import http from "http";
 import { Server } from "socket.io";
 
+import path from "path";
+import { fileURLToPath } from "url";
+
 import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
 const app = express();
+
+// ----------------------
+// Middleware
+// ----------------------
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: "*", // (You can restrict later)
+    credentials: true,
+  })
+);
 
-// Connect DB
+// ----------------------
+// Database Connection
+// ----------------------
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("DB error:", err));
 
-// Socket + server
+// ----------------------
+// HTTP + Socket.IO Server
+// ----------------------
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// Optional: socket logic
-io.on("connection", () => console.log("User connected"));
+io.on("connection", () => console.log("Socket connected"));
 
-// Routes
+// ----------------------
+// API Routes
+// ----------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 
-// Start server
+// ----------------------
+// Serve React Frontend Build (HEROKU REQUIREMENT)
+// ----------------------
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve the frontend build inside /backend/public
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// ----------------------
+// Start Server
+// ----------------------
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
